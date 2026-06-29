@@ -839,6 +839,36 @@ class ApiService {
     }
   }
 
+  // ==================== PAYMENT APIs ====================
+
+  /// Initialize SSLCommerz Payment
+  Future<String?> initPayment({
+    required double amount,
+    required String customerName,
+    required String customerEmail,
+  }) async {
+    try {
+      final url = Uri.parse('$_baseUrl/payment/init');
+      final response = await _requestWithRetry(
+        () async => _client.post(
+          url,
+          headers: await _getHeaders(),
+          body: jsonEncode({
+            'amount': amount,
+            'customer_name': customerName,
+            'customer_email': customerEmail,
+          }),
+        ),
+      );
+      
+      final data = _handleResponse(response);
+      return data['gateway_url'] as String?;
+    } catch (e) {
+      debugPrint('❌ Init payment error: $e');
+      throw _handleError(e);
+    }
+  }
+
   /// Dispose HTTP client
   void dispose() {
     _client.close();

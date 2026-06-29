@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants.dart';
 import '../../core/routes.dart';
 import '../../core/theme.dart';
 import '../../services/auth_service.dart';
+import '../../services/api_service.dart';
 import '../../utils/helpers.dart';
 import '../../widgets/custom_button.dart';
 
@@ -18,6 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _userName = 'User';
   String _userEmail = '';
   String _selectedMarket = '';
+  bool _isUpgrading = false;
 
   @override
   void initState() {
@@ -36,6 +39,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _userEmail = userEmail;
       _selectedMarket = market ?? AppConstants.marketBangladesh;
     });
+  }
+
+  Future<void> _handleUpgradePremium() async {
+    setState(() => _isUpgrading = true);
+    try {
+      final apiService = ApiService();
+      final gatewayUrl = await apiService.initPayment(
+        amount: 500, // Example amount
+        customerName: _userName,
+        customerEmail: _userEmail,
+      );
+
+      if (gatewayUrl != null && gatewayUrl.isNotEmpty) {
+        final uri = Uri.parse(gatewayUrl);
+        if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+          throw 'Could not launch payment gateway';
+        }
+      } else {
+        throw 'Invalid payment gateway URL received';
+      }
+    } catch (e) {
+      if (mounted) {
+        Helpers.showErrorToast('Failed to start payment: $e');
+      }
+    } finally {
+      if (mounted) setState(() => _isUpgrading = false);
+    }
   }
 
   Future<void> _handleLogout() async {
@@ -164,6 +194,87 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onTap: () {
                 Navigator.pushNamed(context, AppRoutes.marketSelection);
               },
+            ),
+
+            const SizedBox(height: 32),
+
+            // Premium Section
+            Text(
+              'Subscription',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            
+            Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppTheme.primaryColor, AppTheme.accentColor],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: _isUpgrading ? null : _handleUpgradePremium,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.workspace_premium,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Upgrade to Premium',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _isUpgrading ? 'Processing...' : 'Unlock advanced AI analytics',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (_isUpgrading)
+                          const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        else
+                          const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
 
             const SizedBox(height: 32),
