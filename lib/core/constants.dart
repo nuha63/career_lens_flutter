@@ -18,7 +18,7 @@ class AppConstants {
       return 'https://carrerlensbackend.onrender.com'; // Default for local network testing
     }
   }
-  static const Duration apiTimeout = Duration(seconds: 30);
+  static const Duration apiTimeout = Duration(seconds: 90);
 
   // Resume Upload
   static const List<String> allowedFileTypes = ['pdf', 'doc', 'docx'];
