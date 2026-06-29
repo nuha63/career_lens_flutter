@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    Base href is replaced by flutter build web automatically.
+    Keep this placeholder as-is.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CareerLens AI – Your AI-powered career guidance platform for Bangladesh and global job markets.">
+
+  <!-- Open Graph / Social Preview -->
+  <meta property="og:title" content="CareerLens AI">
+  <meta property="og:description" content="AI-powered resume analysis, skill gap detection, and career roadmaps.">
+  <meta property="og:type" content="website">
+
+  <!-- PWA / iOS meta tags -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CareerLens AI">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <!-- Title & Manifest -->
+  <title>CareerLens AI</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- 
+    Google Sign-In Web Client ID
+    IMPORTANT: To make Google Sign-In work on Web, you MUST:
+    1. Create a Web OAuth client ID in Google Cloud Console
+    2. Add your Netlify URL to the Authorized JavaScript Origins
+    3. Replace YOUR_WEB_CLIENT_ID_HERE with the actual ID
+  -->
+  <meta name="google-signin-client_id" content="YOUR_WEB_CLIENT_ID_HERE.apps.googleusercontent.com" />
+
+  <!-- Firebase SDK (compat version for Flutter Web) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey:            "AIzaSyAIHmzV8QojCoXrwQRaWf0KwsZAvDnTV8s",
+      authDomain:        "careerlens-ai-89c5c.firebaseapp.com",
+      projectId:         "careerlens-ai-89c5c",
+      storageBucket:     "careerlens-ai-89c5c.firebasestorage.app",
+      messagingSenderId: "649806035247",
+      // Use the WEB appId here (from Firebase Console → Project Settings → Your apps → Web app)
+      appId:             "1:649806035247:android:625cc6427702b8c33209da"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <style>
+    /* Prevent flash of white background before Flutter loads */
+    body {
+      margin: 0;
+      background-color: #0D1B2A;
+    }
+    /* Simple loading spinner shown before Flutter initialises */
+    #loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255,255,255,0.15);
+      border-top-color: #4F8EF7;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading p {
+      color: rgba(255,255,255,0.6);
+      font-family: sans-serif;
+      font-size: 14px;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading placeholder shown until Flutter renders its first frame -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Loading CareerLens AI…</p>
+  </div>
+
+  <script>
+    // Hide the loading indicator once Flutter is ready
+    window.addEventListener('flutter-first-frame', function () {
+      var loader = document.getElementById('loading');
+      if (loader) loader.style.display = 'none';
+    });
+  </script>
+
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "649806035247",
+    "project_id": "careerlens-ai-89c5c",
+    "storage_bucket": "careerlens-ai-89c5c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:649806035247:android:625cc6427702b8c33209da",
+        "android_client_info": {
+          "package_name": "com.careerlens.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "649806035247-rec7bbh0ee2qhdr9grev0okbvdinno9s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.careerlens.app",
+            "certificate_hash": "64a4a491475b0881e09417010282238e0cbd62c7"
+          }
+        },
+        {
+          "client_id": "649806035247-nilhbdhhm6uic9bed0uc13pthdi09ude.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIHmzV8QojCoXrwQRaWf0KwsZAvDnTV8s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "649806035247-nilhbdhhm6uic9bed0uc13pthdi09ude.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
