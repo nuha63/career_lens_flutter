@@ -1,11 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../core/constants.dart';
 import '../../core/theme.dart';
+import '../../services/api_service.dart';
 import '../../widgets/animated_background.dart';
 import '../../widgets/glass_card.dart';
 import '../../utils/helpers.dart';
 
-class PremiumSubscriptionScreen extends StatelessWidget {
+class PremiumSubscriptionScreen extends StatefulWidget {
   const PremiumSubscriptionScreen({super.key});
+
+  @override
+  State<PremiumSubscriptionScreen> createState() => _PremiumSubscriptionScreenState();
+}
+
+class _PremiumSubscriptionScreenState extends State<PremiumSubscriptionScreen> {
+  bool _isUpgrading = false;
+
+  Future<void> _handleUpgrade() async {
+    setState(() => _isUpgrading = true);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userName = prefs.getString('user_name') ?? 'User';
+      final userEmail = prefs.getString(AppConstants.keyUserEmail) ?? 'user@example.com';
+
+      final apiService = ApiService();
+      final gatewayUrl = await apiService.initPayment(
+        amount: 199,
+        customerName: userName,
+        customerEmail: userEmail,
+      );
+
+      if (gatewayUrl != null && gatewayUrl.isNotEmpty) {
+        final uri = Uri.parse(gatewayUrl);
+        if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+          throw 'Could not launch payment gateway';
+        }
+      } else {
+        throw 'Invalid payment gateway URL received';
+      }
+    } catch (e) {
+      if (mounted) {
+        Helpers.showErrorToast('Failed to start payment: $e');
+      }
+    } finally {
+      if (mounted) setState(() => _isUpgrading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,9 +133,7 @@ class PremiumSubscriptionScreen extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                Helpers.showInfoToast('Payment Gateway integration coming soon!');
-              },
+              onPressed: _isUpgrading ? null : _handleUpgrade,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
@@ -102,7 +142,13 @@ class PremiumSubscriptionScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: const Text('Upgrade Now', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              child: _isUpgrading 
+                ? const SizedBox(
+                    height: 20, 
+                    width: 20, 
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                  )
+                : const Text('Upgrade Now', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             ),
           ),
         ],
