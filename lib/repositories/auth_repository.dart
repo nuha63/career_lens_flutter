@@ -65,7 +65,7 @@ class AuthRepository {
       // Replace the value below with your actual Web Client ID.
       const webClientId = String.fromEnvironment(
         'GOOGLE_WEB_CLIENT_ID',
-        defaultValue: '851122145306-f53tiigrtvd14srjm9poo19gserb4eg2.apps.googleusercontent.com',
+        defaultValue: '677889353973-4e5bc97onmv6iqhpi5972qsfdg8lb9bj.apps.googleusercontent.com',
       );
 
       final GoogleSignIn googleSignIn = kIsWeb
