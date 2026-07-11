@@ -92,12 +92,17 @@ class AuthRepository {
       debugPrint("🛠️ Server Auth Code: ${googleAuth.serverAuthCode}");
 
       final idToken = googleAuth.idToken;
+      final accessToken = googleAuth.accessToken;
 
-      if (idToken == null) {
-        throw 'Failed to retrieve ID token from Google. Check your OAuth Client ID configuration.';
+      // GIS on Flutter Web often omits idToken due to Cross-Origin-Opener-Policy
+      // If idToken is null, we use the accessToken. Our FastAPI backend is now updated to handle this!
+      final tokenToSend = idToken ?? accessToken;
+
+      if (tokenToSend == null) {
+        throw 'Failed to retrieve any token from Google. Check your OAuth configuration.';
       }
 
-      await _authService.signInWithGoogle(idToken: idToken);
+      await _authService.signInWithGoogle(idToken: tokenToSend);
 
       final user = await _buildUserFromPrefs();
       await _cache.saveUser(user);
