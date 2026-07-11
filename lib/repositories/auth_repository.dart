@@ -70,7 +70,6 @@ class AuthRepository {
 
       final GoogleSignIn googleSignIn = kIsWeb
           ? GoogleSignIn(
-              clientId: webClientId,
               scopes: ['email', 'profile'],
             )
           : GoogleSignIn(
