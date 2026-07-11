@@ -70,6 +70,7 @@ class AuthRepository {
 
       final GoogleSignIn googleSignIn = kIsWeb
           ? GoogleSignIn(
+              clientId: webClientId,
               scopes: ['email', 'profile'],
             )
           : GoogleSignIn(
@@ -85,6 +86,12 @@ class AuthRepository {
       }
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      
+      // DEBUG LOGS TO SEE WHAT GIS IS RETURNING
+      debugPrint("🛠️ Access Token: ${googleAuth.accessToken}");
+      debugPrint("🛠️ ID Token: ${googleAuth.idToken}");
+      debugPrint("🛠️ Server Auth Code: ${googleAuth.serverAuthCode}");
+
       final idToken = googleAuth.idToken;
 
       if (idToken == null) {
