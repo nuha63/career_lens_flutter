@@ -58,27 +58,39 @@ class AuthRepository {
   Future<UserModel> signInWithGoogle() async {
     try {
       debugPrint('🔐 AuthRepository: signing in with Google...');
-      
+
+      // IMPORTANT: For Flutter Web, pass `clientId` (Web OAuth Client ID).
+      // For Android, pass `serverClientId` (same Web OAuth Client ID).
+      // Both use the *Web Application* OAuth 2.0 Client ID from Google Cloud Console.
+      // Replace the value below with your actual Web Client ID.
+      const webClientId = String.fromEnvironment(
+        'GOOGLE_WEB_CLIENT_ID',
+        defaultValue: '851122145306-f53tiigrtvd14srjm9poo19gserb4eg2.apps.googleusercontent.com',
+      );
+
       final GoogleSignIn googleSignIn = kIsWeb
-          ? GoogleSignIn(scopes: ['email'])
+          ? GoogleSignIn(
+              clientId: webClientId,
+              scopes: ['email', 'profile'],
+            )
           : GoogleSignIn(
-              scopes: ['email'],
-              serverClientId: '649806035247-nilhbdhhm6uic9bed0uc13pthdi09ude.apps.googleusercontent.com',
+              serverClientId: webClientId,
+              scopes: ['email', 'profile'],
             );
-      
+
       // Force the account picker to show by signing out of any previous session first
       await googleSignIn.signOut();
-      
+
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         throw 'Google Sign In was cancelled.';
       }
-      
+
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final idToken = googleAuth.idToken;
-      
+
       if (idToken == null) {
-        throw 'Failed to retrieve ID token from Google.';
+        throw 'Failed to retrieve ID token from Google. Check your OAuth Client ID configuration.';
       }
 
       await _authService.signInWithGoogle(idToken: idToken);
@@ -98,9 +110,41 @@ class AuthRepository {
     }
   }
 
-  /// Sign up, persist the session, and return the new user.
+  /// Send forgot password email.
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _authService.sendPasswordResetEmail(email);
+    } catch (e) {
+      debugPrint('❌ AuthRepository.forgotPassword: $e');
+      rethrow;
+    }
+  }
+
+  /// Reset password using token from email.
+  Future<void> resetPassword({required String token, required String newPassword}) async {
+    try {
+      await _authService.resetPasswordWithToken(token: token, newPassword: newPassword);
+    } catch (e) {
+      debugPrint('❌ AuthRepository.resetPassword: $e');
+      rethrow;
+    }
+  }
+
+  /// Resend email verification.
+  Future<void> resendVerification(String email) async {
+    try {
+      await _authService.resendVerificationEmail(email);
+    } catch (e) {
+      debugPrint('❌ AuthRepository.resendVerification: $e');
+      rethrow;
+    }
+  }
+
+
+  /// Sign up and send verification email.
+  /// After calling this, navigate the user to VerifyEmailScreen.
   /// Throws a human-readable [String] message on failure.
-  Future<UserModel> signup({
+  Future<void> signup({
     required String email,
     required String password,
     String? name,
@@ -114,11 +158,8 @@ class AuthRepository {
         name: name,
       );
 
-      final user = await _buildUserFromPrefs();
-      await _cache.saveUser(user);
-
-      debugPrint('✅ AuthRepository: signup successful for ${user.email}');
-      return user;
+      // Do NOT save user / token here — user hasn't verified yet.
+      debugPrint('✅ AuthRepository: signup submitted for $email — awaiting email verification');
     } catch (e) {
       final msg = e.toString();
       if (msg.contains('SocketException') || msg.contains('No internet') || msg.contains('Failed host lookup')) {
@@ -128,6 +169,7 @@ class AuthRepository {
       rethrow;
     }
   }
+
 
   /// Sign out: clear the remote session and all cached data.
   Future<void> logout() async {

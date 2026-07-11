@@ -51,8 +51,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
     try {
       final authRepo = context.read<AuthRepository>();
-      
-      final user = await authRepo.signup(
+
+      // signup() will throw on error; on success backend returns 201 + requires_verification
+      await authRepo.signup(
         email: _emailController.text.trim(),
         password: _passwordController.text,
         name: _nameController.text.trim(),
@@ -60,13 +61,14 @@ class _SignupScreenState extends State<SignupScreen> {
 
       if (!mounted) return;
 
-      if (user.isAdmin) {
-        Navigator.pushReplacementNamed(context, AppRoutes.adminDashboard);
-      } else {
-        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
-      }
-      Helpers.showSuccessToast('Account created successfully! 🎉');
-      
+      // Navigate to email verification screen — user must verify before logging in
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.verifyEmail,
+        arguments: {'email': _emailController.text.trim()},
+      );
+      Helpers.showSuccessToast('Account created! Check your email to verify. 📧');
+
     } catch (e) {
       Helpers.showErrorToast(e.toString());
     } finally {

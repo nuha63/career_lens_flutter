@@ -187,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             alignment: Alignment.centerRight,
                             child: TextButton(
                               onPressed: () {
-                                Helpers.showInfoToast('Feature coming soon!');
+                                Navigator.pushNamed(context, AppRoutes.forgotPassword);
                               },
                               child: const Text('Forgot Password?'),
                             ),

@@ -26,7 +26,9 @@ class AuthService {
   }
 
   /// Sign up with email and password using backend API.
-  Future<void> signUpWithEmail({
+  /// Returns the email address on success. Throws on error.
+  /// NOTE: After signup, user must verify email before logging in.
+  Future<String> signUpWithEmail({
     required String email,
     required String password,
     String? name,
@@ -47,11 +49,16 @@ class AuthService {
           )
           .timeout(AppConstants.apiTimeout);
 
-      final payload = _parseResponse(response);
-      await _saveUserDataLocally(payload);
-      _isAuthenticated = true;
+      // 201 = created + needs verification (no access token yet)
+      // 200 = legacy immediate login (shouldn't happen with new backend)
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        debugPrint('✅ Backend sign up successful for: $email (status ${response.statusCode})');
+        return email; // Return email so UI can pass it to VerifyEmailScreen
+      }
 
-      debugPrint('✅ Backend sign up successful for: $email');
+      // Any other status is an error
+      _parseResponse(response); // Will throw with error message
+      return email;
     } catch (e) {
       debugPrint('❌ Unexpected sign up error: $e');
       rethrow;
@@ -132,17 +139,74 @@ class AuthService {
 
   /// Send password reset email
   Future<void> sendPasswordResetEmail(String email) async {
-    throw 'Password reset API is not implemented yet.';
+    try {
+      final response = await _client
+          .post(
+            Uri.parse('${AppConstants.baseUrl}/auth/forgot-password'),
+            headers: const {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode({'email': email.trim()}),
+          )
+          .timeout(AppConstants.apiTimeout);
+
+      _parseResponse(response);
+      debugPrint('✅ Password reset email sent to: $email');
+    } catch (e) {
+      debugPrint('❌ Password reset error: $e');
+      rethrow;
+    }
   }
 
-  /// Send email verification
-  Future<void> sendEmailVerification() async {
-    throw 'Email verification is not implemented for backend auth yet.';
+  /// Resend email verification
+  Future<void> resendVerificationEmail(String email) async {
+    try {
+      final response = await _client
+          .post(
+            Uri.parse('${AppConstants.baseUrl}/auth/resend-verification'),
+            headers: const {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode({'email': email.trim()}),
+          )
+          .timeout(AppConstants.apiTimeout);
+
+      _parseResponse(response);
+      debugPrint('✅ Verification email resent to: $email');
+    } catch (e) {
+      debugPrint('❌ Resend verification error: $e');
+      rethrow;
+    }
   }
 
-  /// Check if email is verified
-  Future<bool> isEmailVerified() async {
-    return true;
+  /// Reset password with token
+  Future<void> resetPasswordWithToken({
+    required String token,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await _client
+          .post(
+            Uri.parse('${AppConstants.baseUrl}/auth/reset-password'),
+            headers: const {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode({
+              'token': token,
+              'new_password': newPassword,
+            }),
+          )
+          .timeout(AppConstants.apiTimeout);
+
+      _parseResponse(response);
+      debugPrint('✅ Password reset successfully');
+    } catch (e) {
+      debugPrint('❌ Reset password error: $e');
+      rethrow;
+    }
   }
 
   /// Delete user account

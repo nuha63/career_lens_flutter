@@ -4,6 +4,9 @@ import '../models/resume_model.dart';
 import '../models/skill_model.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/signup_screen.dart';
+import '../screens/auth/verify_email_screen.dart';
+import '../screens/auth/forgot_password_screen.dart';
+import '../screens/auth/reset_password_screen.dart';
 import '../screens/main_layout.dart';
 import '../screens/home/dashboard_screen.dart';
 import '../screens/home/market_selection_screen.dart';
@@ -47,6 +50,9 @@ class AppRoutes {
   static const String careerRoadmaps = '/career-roadmaps';
   static const String careerRoadmapDetail = '/career-roadmap-detail';
   static const String salaryPrediction = '/salary-prediction';
+  static const String verifyEmail = '/verify-email';
+  static const String forgotPassword = '/forgot-password';
+  static const String resetPassword = '/reset-password';
 
   // Initial Route
   static const String initialRoute = login;
@@ -63,6 +69,21 @@ class AppRoutes {
 
       case signup:
         return MaterialPageRoute(builder: (_) => const SignupScreen());
+
+      case verifyEmail:
+        final email = (mapArgs['email'] as String?) ?? '';
+        return MaterialPageRoute(
+          builder: (_) => VerifyEmailScreen(email: email),
+        );
+
+      case forgotPassword:
+        return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
+
+      case resetPassword:
+        final token = (mapArgs['token'] as String?) ?? '';
+        return MaterialPageRoute(
+          builder: (_) => ResetPasswordScreen(token: token),
+        );
 
       case dashboard:
         return MaterialPageRoute(builder: (_) => const MainLayoutScreen());
