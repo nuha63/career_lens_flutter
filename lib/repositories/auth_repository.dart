@@ -78,8 +78,7 @@ class AuthRepository {
               scopes: ['email', 'profile'],
             );
 
-      // Force the account picker to show by signing out of any previous session first
-      await googleSignIn.signOut();
+      // Removed signOut() here as it can cause GIS to fail on Web
 
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
